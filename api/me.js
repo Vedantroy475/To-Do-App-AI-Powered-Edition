@@ -1,14 +1,11 @@
-// netlify/functions/me.js
-import { getTokenPayloadFromEvent } from "./_auth.js";
+// api/me.js
+import { getTokenPayloadFromRequest } from "./_auth.js";
 
-export async function handler(event) {
+export default async function handler(req, res) {
   try {
-    const payload = getTokenPayloadFromEvent(event);
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ userId: payload.userId, username: payload.username })
-    };
+    const payload = getTokenPayloadFromRequest(req);
+    return res.status(200).json({ userId: payload.userId, username: payload.username });
   } catch (err) {
-    return { statusCode: 401, body: JSON.stringify({ error: "not authenticated" }) };
+    return res.status(401).json({ error: "not authenticated" });
   }
 }

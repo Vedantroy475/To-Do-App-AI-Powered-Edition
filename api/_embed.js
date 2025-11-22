@@ -1,4 +1,4 @@
-// netlify/functions/_embed.js
+// api/_embed.js
 // small helper to call external embedding service from server-side
 export async function callEmbedService({ serviceUrl, apiKey, userId, todoId, text }) {
   if (!serviceUrl) throw new Error("EMBED_SERVICE_URL not configured");

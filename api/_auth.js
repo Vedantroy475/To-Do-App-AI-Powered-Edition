@@ -1,9 +1,10 @@
-// netlify/functions/_auth.js (ESM helper)
+// api/_auth.js
+
 import jwt from "jsonwebtoken";
 import cookie from "cookie";
 
-export function getTokenPayloadFromEvent(event) {
-  const headers = event.headers || {};
+export function getTokenPayloadFromRequest(req) {
+  const headers = req.headers || {};
   const cookieHeader = headers.cookie || headers.Cookie || "";
   if (!cookieHeader) throw new Error("no-cookie");
 

@@ -1,5 +1,5 @@
-// netlify/functions/aiChat.js
-import { getTokenPayloadFromEvent } from "./_auth.js";
+// api/aiChat.js
+import { getTokenPayloadFromRequest } from "./_auth.js";
 import { callEmbedSearch } from "./_embed.js";
 
 /**
@@ -8,13 +8,13 @@ import { callEmbedSearch } from "./_embed.js";
  * - Calls embedding service /search to retrieve relevant user-specific docs
  * - Sends prompt + retrieved context to OpenRouter chat/completions
  */
-
 const MODEL_CANDIDATES = [
-  "alibaba/tongyi-deepresearch-30b-a3b:free",
-  "meituan/longcat-flash-chat:free",
   "z-ai/glm-4.5-air:free",
+  "qwen/qwen3-30b-a3b:free",
+  "nvidia/nemotron-nano-9b-v2:free",
+  "mistralai/mistral-small-3.2-24b-instruct:free",
+  "microsoft/mai-ds-r1:free",
 ];
-
 const MAX_RETRIES = 2;
 const BASE_DELAY_MS = 500;
 
@@ -31,34 +31,27 @@ async function callOpenRouter(model, messages) {
       messages,
     }),
   });
-
   const data = await resp.json();
   return { status: resp.status, data };
 }
 
-export async function handler(event) {
-  if (event.httpMethod !== "POST") return { statusCode: 405 };
-
+export default async function handler(req, res) {
   console.log("--- aiChat function started ---");
-  
+
   try {
     // 1) authenticate user (cookie)
-    const payload = getTokenPayloadFromEvent(event);
+    const payload = getTokenPayloadFromRequest(req);
     const userId = payload.userId;
-
     console.log(`Authenticated user: ${userId}`);
-
-    const body = JSON.parse(event.body || "{}");
-    const prompt = (body.prompt || "").toString().trim();
-    if (!prompt) return { statusCode: 400, body: JSON.stringify({ error: "prompt required" }) };
-
+    const { prompt } = req.body;
+    if (!prompt) {
+      return res.status(400).json({ error: "prompt required" });
+    }
     console.log(`Received prompt: "${prompt}"`);
-
     // 2) call embedding service search to retrieve topK relevant pieces for this user
     const EMBED_SERVICE_URL = process.env.EMBED_SERVICE_URL;
     const EMBED_API_KEY = process.env.EMBED_API_KEY;
     const TOP_K = Number(process.env.RAG_TOP_K || 5);
-
     let retrieved = [];
     if (EMBED_SERVICE_URL && EMBED_API_KEY) {
       console.log(`Calling embed search service at: ${EMBED_SERVICE_URL}/search`);
@@ -70,13 +63,10 @@ export async function handler(event) {
           query: prompt,
           k: TOP_K
         });
-
         console.log("Embed search response:", JSON.stringify(searchResp, null, 2));
-
         if (searchResp.ok && searchResp.body && Array.isArray(searchResp.body.results)) {
           retrieved = searchResp.body.results;
           console.log(`Retrieved ${retrieved.length} documents.`);
-
         } else {
           console.warn("Embedding search returned no results or error:", searchResp);
         }
@@ -86,31 +76,26 @@ export async function handler(event) {
     } else {
       console.info("Embed search not configured (EMBED_SERVICE_URL / EMBED_API_KEY). Proceeding without retrieval.");
     }
-
     // 3) Build concise context string from retrieved docs (limit size)
     // We'll include todo text and score (if present). Truncate long texts for safety.
     function safeText(s, max = 400) {
       if (!s) return "";
       return s.length > max ? s.slice(0, max - 3) + "..." : s;
     }
-
     const contextChunks = (retrieved || []).map((r, i) => {
       const text = safeText(r.text ?? r.plot ?? "");
       const score = typeof r.score !== "undefined" ? ` (score: ${Number(r.score).toFixed(3)})` : "";
       return `#${i + 1}${score}: ${text}`;
     });
-
     const retrievalContext = contextChunks.length > 0
       ? `Here are the ${contextChunks.length} most relevant todo snippets from the user's data:\n${contextChunks.join("\n")}\n\nUse them to answer the user's question where helpful.`
       : "";
-
-      console.log("Constructed retrieval context snippet:", retrievalContext.substring(0, 500) + (retrievalContext.length > 500 ? "..." : ""));
-
+    console.log("Constructed retrieval context snippet:", retrievalContext.substring(0, 500) + (retrievalContext.length > 500 ? "..." : ""));
     // 4) Compose system + user messages for OpenRouter
     const systemMessage = {
       role: "system",
       content:
-`You are an intelligent AI assistant deeply integrated into a personal productivity todo application. Your role is to help users manage, understand, and optimize their tasks and workflows through thoughtful analysis and actionable guidance.
+        `You are an intelligent AI assistant deeply integrated into a personal productivity todo application. Your role is to help users manage, understand, and optimize their tasks and workflows through thoughtful analysis and actionable guidance.
 
 ## Core Identity & Purpose
 - You are a productivity-focused AI advisor with deep understanding of task management, prioritization, and personal effectiveness
@@ -171,18 +156,13 @@ export async function handler(event) {
 
 You are helpful, honest, and focused on making the user more effective with their tasks. When uncertain, ask clarifying questions rather than guessing.`
     };
-
     const userMessageContent = retrievalContext
       ? `${retrievalContext}\nUser question: ${prompt}`
       : `${prompt}\n(Note: no user data retrieved)`;
-
     const userMessage = { role: "user", content: userMessageContent };
-
     console.log("Final User Message Content (snippet):", userMessageContent.substring(0, 500) + (userMessageContent.length > 500 ? "..." : ""));
-
     // 5) Try model candidates with retries/backoff
     console.log("Calling OpenRouter...");
-
     for (const model of MODEL_CANDIDATES) {
       console.log(`Trying model: ${model}`);
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -190,7 +170,6 @@ You are helpful, honest, and focused on making the user more effective with thei
           const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
           await new Promise(r => setTimeout(r, delay));
         }
-
         let result;
         try {
           result = await callOpenRouter(model, [systemMessage, userMessage]);
@@ -199,14 +178,12 @@ You are helpful, honest, and focused on making the user more effective with thei
           if (attempt === MAX_RETRIES) break;
           else continue;
         }
-
         const { status, data } = result;
         if (!data) {
           console.warn("OpenRouter returned empty response", result);
           if (attempt === MAX_RETRIES) break;
           else continue;
         }
-
         // Handle provider error wrapper
         if (data?.error) {
           const code = data.error.code;
@@ -217,16 +194,11 @@ You are helpful, honest, and focused on making the user more effective with thei
           // otherwise try next model
           break;
         }
-
         // Extract reply (chat-completion)
         const reply = data.choices?.[0]?.message?.content ?? data.choices?.[0]?.text ?? "";
         if (reply) {
           console.log(`OpenRouter Success (model=${model}). Reply snippet:`, reply.substring(0, 100) + "...");
-          return {
-            statusCode: 200,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ reply, retrieved: retrieved || [] })
-          };
+          return res.status(200).json({ reply, retrieved: retrieved || [] });
         } else {
           console.warn("OpenRouter returned no reply field; raw data:", JSON.stringify(data));
           if (attempt < MAX_RETRIES) continue;
@@ -235,23 +207,17 @@ You are helpful, honest, and focused on making the user more effective with thei
       } // attempts
       // try next model
     } // models
-
     // all failed
     console.error("All OpenRouter models failed.");
-    return {
-      statusCode: 502,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "All model endpoints failed or are rate-limited" })
-    };
-
+    return res.status(502).json({ error: "All model endpoints failed or are rate-limited" });
   } catch (err) {
     // auth helper throws known messages
     console.error("aiChat top-level error:", err);
     if (err.message === "no-token" || err.message === "invalid-token" || err.message === "no-cookie") {
-      return { statusCode: 401, body: JSON.stringify({ error: "not authenticated" }) };
+      return res.status(401).json({ error: "not authenticated" });
     }
     console.error("aiChat (RAG) error:", err);
-    return { statusCode: 500, body: JSON.stringify({ error: "AI call failed" }) };
+    return res.status(500).json({ error: "AI call failed" });
   } finally {
     console.log("--- aiChat function finished ---"); // <-- LOGGING
   }

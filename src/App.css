@@ -1,16 +1,19 @@
 @import "tailwindcss";
+
 /* Hide the main browser scrollbar */
 body {
-  overflow-y: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: none;
+  /* Prevents "pull to refresh" effect on some mobile browsers if desired */
 }
 
 .app-container {
   display: flex;
   flex-direction: column;
-  
+
 }
 
-button :hover{
+button :hover {
   cursor: pointer;
 }
 
@@ -18,49 +21,63 @@ button :hover{
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
 .loading-spinner {
-  display: inline-block; /* Needed for transform */
+  display: inline-block;
+  /* Needed for transform */
   animation: spin 1s linear infinite;
 }
 
 /* Optional: Slightly reduce opacity while loading */
 button:disabled .loading-spinner {
-   opacity: 0.8;
+  opacity: 0.8;
 }
 
 /* Add these styles to your App.css file */
 
 .todo-textarea {
-  height: 48px; /* Changed from min-height to height for better animation */
-  resize: none; /* Prevents users from manually resizing */
-  overflow-y: hidden; /* Hides the scrollbar initially */
-  transition: height 0.4s ease-in-out, overflow 0.3s ease-in-out; /* Consistent smooth transition */
+  height: 48px;
+  /* Changed from min-height to height for better animation */
+  resize: none;
+  /* Prevents users from manually resizing */
+  overflow-y: hidden;
+  /* Hides the scrollbar initially */
+  transition: height 0.4s ease-in-out, overflow 0.3s ease-in-out;
+  /* Consistent smooth transition */
 }
 
 .todo-textarea:focus {
-  height: 60vh; /* Expands height on focus */
-  overflow-y: auto; /* Adds a scrollbar if content overflows */
+  height: 60vh;
+  /* Expands height on focus */
+  overflow-y: auto;
+  /* Adds a scrollbar if content overflows */
   /* Removed transition from here - let the base class handle it */
 }
 
 @media (min-width: 768px) {
+  
+  body {
+    overflow-y: hidden;
+  }
+
   .app-container {
     flex-direction: row;
   }
-  
-  .todo-section, .ai-section {
+
+  .todo-section,
+  .ai-section {
     flex: 1;
   }
-  
+
   .todo-section {
     padding-right: 10px;
   }
-  
+
   .ai-section {
     padding-left: 10px;
   }

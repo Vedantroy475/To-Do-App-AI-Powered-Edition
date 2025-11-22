@@ -1,27 +1,24 @@
-// netlify/functions/getTodos.js
+// api/getTodos.js
 import { connectToDatabase } from "./_db.js";
-import { getTokenPayloadFromEvent } from "./_auth.js";
+import { getTokenPayloadFromRequest } from "./_auth.js";
 
-export async function handler(event) {
-  if (event.httpMethod !== "GET") return { statusCode: 405 };
-
+export default async function handler(req, res) {
   try {
-    const payload = getTokenPayloadFromEvent(event);
+    const payload = getTokenPayloadFromRequest(req);
     const userId = payload.userId;
-
     const { pool } = await connectToDatabase();
-    
-    const res = await pool.query(
-      'SELECT * FROM todos WHERE "userId" = $1 ORDER BY "createdAt" DESC', 
+   
+    const resQuery = await pool.query(
+      'SELECT * FROM todos WHERE "userId" = $1 ORDER BY "createdAt" DESC',
       [userId]
     );
-    
-    return { statusCode: 200, body: JSON.stringify({ todos: res.rows }) };
+   
+    return res.status(200).json({ todos: resQuery.rows });
   } catch (err) {
     if (err.message === "no-token" || err.message === "invalid-token" || err.message === "no-cookie") {
-      return { statusCode: 401, body: JSON.stringify({ error: "not authenticated" }) };
+      return res.status(401).json({ error: "not authenticated" });
     }
     console.error("getTodos error:", err);
-    return { statusCode: 500, body: JSON.stringify({ error: "server error" }) };
+    return res.status(500).json({ error: "server error" });
   }
 }

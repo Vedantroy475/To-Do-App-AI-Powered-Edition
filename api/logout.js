@@ -1,9 +1,7 @@
-// netlify/functions/logout.js
+// api/logout.js
 import cookie from "cookie";
 
-export async function handler(event) {
-  if (event.httpMethod !== "POST") return { statusCode: 405 };
-
+export default async function handler(req, res) {
   const isProd = process.env.NODE_ENV === "production";
   const cookieStr = cookie.serialize("token", "", {
     httpOnly: true,
@@ -12,10 +10,6 @@ export async function handler(event) {
     path: "/",
     expires: new Date(0)
   });
-
-  return {
-    statusCode: 200,
-    headers: { "Set-Cookie": cookieStr },
-    body: JSON.stringify({ message: "logged out" })
-  };
+  res.setHeader('Set-Cookie', cookieStr);
+  return res.status(200).json({ message: "logged out" });
 }

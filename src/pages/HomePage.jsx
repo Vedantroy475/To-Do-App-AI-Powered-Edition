@@ -45,6 +45,7 @@ function HomePage({ user }) {
     }
   };
 
+  // This wrapper receives (event, id) from the TodoItem button click
   const handleEdit = (e, id) => {
     const todoText = handleEditTodo(id);
     if (todoText) {
@@ -52,7 +53,9 @@ function HomePage({ user }) {
     }
   };
 
+  // This wrapper receives (event, id) from the TodoItem button click
   const handleDelete = async (e, id) => {
+    // Pass strictly the ID and the setSummaries function to the hook
     const shouldClearInput = await handleDeleteTodo(id, setSummaries);
     if (shouldClearInput) {
       setTodo("");
@@ -101,6 +104,7 @@ function HomePage({ user }) {
         buttonLoading={buttonLoading}
         summaries={summaries}
         handleSummaryClose={handleSummaryClose}
+        className="w-full"
       />
     </>
   );

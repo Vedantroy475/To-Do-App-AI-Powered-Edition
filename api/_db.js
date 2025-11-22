@@ -1,4 +1,4 @@
-// netlify/functions/_db.js
+// api/_db.js
 import pg from "pg";
 import { v4 as uuidv4 } from "uuid"; // We'll need this for user IDs
 

@@ -1,29 +1,23 @@
-// netlify/functions/updateTodo.js
+// api/updateTodo.js
 import { connectToDatabase } from "./_db.js";
-import { getTokenPayloadFromEvent } from "./_auth.js";
+import { getTokenPayloadFromRequest } from "./_auth.js";
 import { callEmbedService } from "./_embed.js";
 
-export async function handler(event) {
-  if (event.httpMethod !== "PUT") return { statusCode: 405 };
-
+export default async function handler(req, res) {
   try {
-    const payload = getTokenPayloadFromEvent(event);
+    const payload = getTokenPayloadFromRequest(req);
     const userId = payload.userId;
-
-    const body = JSON.parse(event.body || "{}");
-    const { id, todo, isCompleted } = body;
-    if (!id) return { statusCode: 400, body: JSON.stringify({ error: "id required" }) };
-
+    const { id, todo, isCompleted } = req.body;
+    if (!id) {
+      return res.status(400).json({ error: "id required" });
+    }
     const { pool } = await connectToDatabase();
-
     const updateFields = {};
     if (typeof todo === "string") updateFields.todo = todo.trim();
     if (typeof isCompleted === "boolean") updateFields.isCompleted = isCompleted;
-
     if (Object.keys(updateFields).length === 0) {
-      return { statusCode: 400, body: JSON.stringify({ error: "nothing to update" }) };
+      return res.status(400).json({ error: "nothing to update" });
     }
-
     // 1. Build the dynamic UPDATE query
     const fields = [];
     const values = [];
@@ -34,33 +28,27 @@ export async function handler(event) {
       fields.push(`${colName} = $${i++}`);
       values.push(value);
     }
-    
+   
     // Add the WHERE clause values
     values.push(id); // $${i++}
     values.push(userId); // $${i++}
-
     const updateQuery = `
-      UPDATE todos 
-      SET ${fields.join(", ")} 
+      UPDATE todos
+      SET ${fields.join(", ")}
       WHERE id = $${i} AND "userId" = $${i + 1}
       RETURNING *
     `;
-
     // 2. Perform the update and get the returned doc
     const updateResult = await pool.query(updateQuery, values);
-
     // 3. Check if a document was actually found and updated
     if (updateResult.rowCount === 0) {
-      return { statusCode: 404, body: JSON.stringify({ error: "not found" }) };
+      return res.status(404).json({ error: "not found" });
     }
-
     const updatedDoc = updateResult.rows[0];
-
     // 4. If the todo text changed, re-embed (best-effort)
     if (typeof todo === "string") {
       const EMBED_SERVICE_URL = process.env.EMBED_SERVICE_URL;
       const EMBED_API_KEY = process.env.EMBED_API_KEY;
-
       if (EMBED_SERVICE_URL && EMBED_API_KEY) {
         try {
           const embedResp = await callEmbedService({
@@ -70,7 +58,6 @@ export async function handler(event) {
             todoId: updatedDoc.id,
             text: updatedDoc.todo
           });
-
           if (!embedResp.ok) {
             console.warn("Failed to update embedding for todo", updatedDoc.id, embedResp);
           }
@@ -81,13 +68,12 @@ export async function handler(event) {
         console.info("Embed service not configured. Skipping re-embed.");
       }
     }
-
-    return { statusCode: 200, body: JSON.stringify({ todo: updatedDoc }) };
+    return res.status(200).json({ todo: updatedDoc });
   } catch (err) {
     if (err.message === "no-token" || err.message === "invalid-token" || err.message === "no-cookie") {
-      return { statusCode: 401, body: JSON.stringify({ error: "not authenticated" }) };
+      return res.status(401).json({ error: "not authenticated" });
     }
     console.error("updateTodo error:", err);
-    return { statusCode: 500, body: JSON.stringify({ error: "server error" }) };
+    return res.status(500).json({ error: "server error" });
   }
 }

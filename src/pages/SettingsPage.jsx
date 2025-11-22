@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Lock, Trash2 } from 'lucide-react';
 import PasswordInput from '../components/PasswordInput';
 import PasswordStrengthValidator from '../components/PasswordStrengthValidator';
-
 function SettingsPage({ refreshAuth }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -12,18 +11,15 @@ function SettingsPage({ refreshAuth }) {
   const [saveLoading, setSaveLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
   // Password form states
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newPasswordStrength, setNewPasswordStrength] = useState(0);
-
   const handleNewPasswordChange = (e) => {
     const newPwd = e.target.value;
     setNewPassword(newPwd);
     setNewPasswordStrength(PasswordStrengthValidator.calculateStrength(newPwd));
   };
-
   // Fetch user on mount
   useEffect(() => {
     const fetchUser = async () => {
@@ -44,7 +40,6 @@ function SettingsPage({ refreshAuth }) {
     };
     fetchUser();
   }, [navigate]);
-
   const handleSaveChanges = async (e) => {
     e.preventDefault();
     if (!newPassword) {
@@ -56,7 +51,6 @@ function SettingsPage({ refreshAuth }) {
       setError(PasswordStrengthValidator.getErrorMessage());
       return;
     }
-
     setSaveLoading(true);
     setError('');
     setSuccess('');
@@ -67,15 +61,12 @@ function SettingsPage({ refreshAuth }) {
         body: JSON.stringify({ currentPassword, newPassword }),
         credentials: 'include',
       });
-
       if (!res.ok) {
         const json = await res.json().catch(() => ({ error: 'An unknown error occurred' }));
         throw new Error(json.error || 'Failed to change password');
       }
-
       // Logout after password change to force re-login
       await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-
       setSuccess('Password changed successfully! Logging you out...');
       setCurrentPassword('');
       setNewPassword('');
@@ -90,27 +81,22 @@ function SettingsPage({ refreshAuth }) {
       setSaveLoading(false);
     }
   };
-
   const handleDeleteAccount = async () => {
     if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       return;
     }
-
     try {
       const res = await fetch('/api/delete-account', {
         method: 'POST',
         credentials: 'include',
       });
-
       if (!res.ok) {
         const json = await res.json().catch(() => ({ error: 'An unknown error occurred' }));
         alert(json.error || 'Failed to delete account');
         return;
       }
-
       // Logout after deletion (todos and embeddings already deleted in backend)
       await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-
       setSuccess('Account deleted successfully. Redirecting to login...');
       setTimeout(() => {
         if (refreshAuth) refreshAuth();
@@ -121,22 +107,18 @@ function SettingsPage({ refreshAuth }) {
       alert('An error occurred while deleting the account.');
     }
   };
-
   if (loading) {
     return <div className="flex justify-center items-center h-64">Loading...</div>;
   }
-
   if (!user) {
     return null; // Redirect handled in useEffect
   }
-
   return (
-    <div className="flex flex-col max-w-4xl mx-auto">
+    <div className="flex flex-col max-w-4xl mx-auto bg-custom-bg min-h-screen">
       {/* Profile Header */}
       <div className="flex flex-wrap justify-between gap-3 p-4 mb-6">
         <p className="text-[#111618] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Settings</p>
       </div>
-
       <div className="flex p-4 mb-6">
         <div className="flex w-full flex-col gap-4 @[520px]:flex-row @[520px]:justify-between @[520px]:items-center">
           <div className="flex gap-4 items-center">
@@ -146,7 +128,6 @@ function SettingsPage({ refreshAuth }) {
           </div>
         </div>
       </div>
-
       {/* Profile Fields (Read-only) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 mb-8">
         <label className="flex flex-col min-w-40 flex-1">
@@ -158,7 +139,6 @@ function SettingsPage({ refreshAuth }) {
           />
         </label>
       </div>
-
       {/* Change Password Section */}
       <div className="p-4 mb-8">
         <h2 className="text-xl font-bold text-[#111618] dark:text-white mb-4 flex items-center gap-2">
@@ -197,7 +177,6 @@ function SettingsPage({ refreshAuth }) {
           </div>
         </form>
       </div>
-
       {/* Save Changes Button */}
       <div className="flex justify-end p-4">
         <button
@@ -208,7 +187,6 @@ function SettingsPage({ refreshAuth }) {
           <span className="truncate">{saveLoading ? 'Saving...' : 'Save Changes'}</span>
         </button>
       </div>
-
       {/* Danger Zone - Delete Account */}
       <div className="p-4 mt-8 border-t border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/10 rounded-lg">
         <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-4 flex items-center gap-2">
@@ -226,5 +204,4 @@ function SettingsPage({ refreshAuth }) {
     </div>
   );
 }
-
 export default SettingsPage;
