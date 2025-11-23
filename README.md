@@ -132,7 +132,8 @@ Seamlessly capture ideas without typing. The app utilizes the **Web Speech API**
   - **Usage:** Available in both the main Todo Input field and the AI Chat interface.
   - **UX:** Features visual feedback for listening states and handles permission management gracefully.
 
-[<video controls src="docs/Demo Video for Voice to Text Feature.mp4" title="Demo Video for Voice to Text Functionality"></video>](https://github.com/user-attachments/assets/a2d418d1-e950-4eba-8c7e-9eab5355d5b1)
+[<video controls src="docs/Demo Video for Voice to Text Feature.mp4" title="Demo Video for Voice to Text Feature"></video>](https://github.com/user-attachments/assets/219667c9-111a-4587-a21d-815bc2d1efdc)
+
 -----
 
 ## 🏗️ Architecture & Technology Stack
