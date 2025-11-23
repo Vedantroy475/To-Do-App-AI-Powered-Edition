@@ -3,6 +3,9 @@
 
 # 🚀 AI-Powered RAG Todo Application
 
+> **🔴 LIVE DEMO:** Experience the production build running on Google Cloud Run:
+> 👉 **[https://todo-420731733943.asia-south1.run.app](https://todo-420731733943.asia-south1.run.app)**
+
 A next-generation productivity tool that fuses a standard Todo application with **Retrieval-Augmented Generation (RAG)**. This application doesn't just store your tasks; it understands them, summarizes them, improves your grammar, and allows you to chat with your data using state-of-the-art LLMs.
 
 This repository contains the **Frontend (React + Vite)** and the **BFF (Backend-for-Frontend)** API logic running on Node.js. It communicates with a separate Python-based microservice for vector embedding operations.
