@@ -105,7 +105,7 @@ Ensure your tasks are clear and professional.
   - **Function:** The "Magic Wand" button analyzes your todo text.
   - **Tech:** It prompts the AI to polish the grammar and phrasing, then automatically updates the task in the database with the improved version—no manual editing required.
 
-<video controls src="docs/Demo Video For Grammar Improve.mp4" title="Demo Video for Grammar Improvement using AI"></video>
+[<video controls src="docs/Demo Video For Grammar Improve.mp4" title="Demo Video for Grammar Improvement using AI"></video>](https://github.com/user-attachments/assets/1603c051-5f4b-4f7b-a858-33948124bbe4)
 
 ### 2\. 🧠 AI-Powered Summarization
 
@@ -114,7 +114,7 @@ Don't get bogged down by long, detailed task descriptions.
   - **Function:** One-click summarization for verbose todos (automatically triggers for tasks \> 50 chars).
   - **Tech:** Sends the specific todo context to the LLM, which returns a concise, markdown-formatted summary displayed in an accordion view directly under the task.
 
-  <video controls src="docs/Demo Video for AI Summarize.mp4" title="Demo Video for AI Based Summarization of Todo"></video>
+  [<video controls src="docs/Demo Video for AI Summarize.mp4" title="Demo Video for AI Based Summarization of Todo"></video>](https://github.com/user-attachments/assets/44238a18-1ea3-4c2e-ae63-2db2690b4aa4)
 
 ### 3\. 💬 RAG-Based AI Chat Interface
 
@@ -123,7 +123,7 @@ The crown jewel of the application. You can converse with an AI Assistant that h
   - **Context-Aware:** Unlike standard ChatGPT, this assistant pulls *your* relevant todos into its context window.
   - **Example Queries:** *"Do I have any deadlines related to the project?", "Summarize my shopping list,"* or *"What tasks are pending regarding the backend?"*
 
-<video controls src="docs/Demo Video for RAG Based AI Chat Interface.mp4" title="Demo Video for RAG-Based AI Chat Interface"></video>
+[<video controls src="docs/Demo Video for RAG Based AI Chat Interface.mp4" title="Demo Video for RAG-Based AI Chat Interface"></video>](https://github.com/user-attachments/assets/83ad25e3-dac9-4240-8874-b86d841321fd)
 
 ### 4\. 🗣️ Voice-to-Text Integration
 
@@ -132,7 +132,7 @@ Seamlessly capture ideas without typing. The app utilizes the **Web Speech API**
   - **Usage:** Available in both the main Todo Input field and the AI Chat interface.
   - **UX:** Features visual feedback for listening states and handles permission management gracefully.
 
-<video controls src="docs/Demo Video for Voice to Text Feature.mp4" title="Demo Video for Voice to Text Functionality"></video>
+[<video controls src="docs/Demo Video for Voice to Text Feature.mp4" title="Demo Video for Voice to Text Functionality"></video>](https://github.com/user-attachments/assets/a2d418d1-e950-4eba-8c7e-9eab5355d5b1)
 -----
 
 ## 🏗️ Architecture & Technology Stack
