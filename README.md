@@ -12,6 +12,9 @@ This repository contains the **Frontend (React + Vite)** and the **BFF (Backend-
 
 > **🔗 Related Repository:**
 > The Embedding Service (Python/FastAPI) logic can be found here: [**FastAPI Embedding Service Repo**](https://github.com/Vedantroy475/Fastapi-Embedding-Service-for-AI-Powered-Todo.git)
+
+> **🎥 Full Walkthrough:** Watch the system in action ( AI Agents, RAG Chat) without waiting for cold starts:
+> 👉 **[Watch Video Demo on Google Drive](https://drive.google.com/file/d/1ldu7uddTZkGLydh5yzuGOMjJnf0Krqjq/view?usp=sharing)**
 -----
 
 ## 📖 Table of Contents
