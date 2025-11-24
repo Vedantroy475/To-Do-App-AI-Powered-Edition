@@ -3,6 +3,9 @@
 
 # 🚀 AI-Powered RAG Todo Application
 
+> **🔴 LIVE DEMO:** Experience the production build running on Google Cloud Run:
+> 👉 **[https://todo-420731733943.asia-south1.run.app](https://todo-420731733943.asia-south1.run.app)**
+
 A next-generation productivity tool that fuses a standard Todo application with **Retrieval-Augmented Generation (RAG)**. This application doesn't just store your tasks; it understands them, summarizes them, improves your grammar, and allows you to chat with your data using state-of-the-art LLMs.
 
 This repository contains the **Frontend (React + Vite)** and the **BFF (Backend-for-Frontend)** API logic running on Node.js. It communicates with a separate Python-based microservice for vector embedding operations.
@@ -105,7 +108,7 @@ Ensure your tasks are clear and professional.
   - **Function:** The "Magic Wand" button analyzes your todo text.
   - **Tech:** It prompts the AI to polish the grammar and phrasing, then automatically updates the task in the database with the improved version—no manual editing required.
 
-<video controls src="docs/Demo Video For Grammar Improve.mp4" title="Demo Video for Grammar Improvement using AI"></video>
+[<video controls src="docs/Demo Video For Grammar Improve.mp4" title="Demo Video for Grammar Improvement using AI"></video>](https://github.com/user-attachments/assets/1603c051-5f4b-4f7b-a858-33948124bbe4)
 
 ### 2\. 🧠 AI-Powered Summarization
 
@@ -114,7 +117,7 @@ Don't get bogged down by long, detailed task descriptions.
   - **Function:** One-click summarization for verbose todos (automatically triggers for tasks \> 50 chars).
   - **Tech:** Sends the specific todo context to the LLM, which returns a concise, markdown-formatted summary displayed in an accordion view directly under the task.
 
-  <video controls src="docs/Demo Video for AI Summarize.mp4" title="Demo Video for AI Based Summarization of Todo"></video>
+  [<video controls src="docs/Demo Video for AI Summarize.mp4" title="Demo Video for AI Based Summarization of Todo"></video>](https://github.com/user-attachments/assets/44238a18-1ea3-4c2e-ae63-2db2690b4aa4)
 
 ### 3\. 💬 RAG-Based AI Chat Interface
 
@@ -123,7 +126,7 @@ The crown jewel of the application. You can converse with an AI Assistant that h
   - **Context-Aware:** Unlike standard ChatGPT, this assistant pulls *your* relevant todos into its context window.
   - **Example Queries:** *"Do I have any deadlines related to the project?", "Summarize my shopping list,"* or *"What tasks are pending regarding the backend?"*
 
-<video controls src="docs/Demo Video for RAG Based AI Chat Interface.mp4" title="Demo Video for RAG-Based AI Chat Interface"></video>
+[<video controls src="docs/Demo Video for RAG Based AI Chat Interface.mp4" title="Demo Video for RAG-Based AI Chat Interface"></video>](https://github.com/user-attachments/assets/83ad25e3-dac9-4240-8874-b86d841321fd)
 
 ### 4\. 🗣️ Voice-to-Text Integration
 
@@ -132,7 +135,8 @@ Seamlessly capture ideas without typing. The app utilizes the **Web Speech API**
   - **Usage:** Available in both the main Todo Input field and the AI Chat interface.
   - **UX:** Features visual feedback for listening states and handles permission management gracefully.
 
-<video controls src="docs/Demo Video for Voice to Text Feature.mp4" title="Demo Video for Voice to Text Functionality"></video>
+[<video controls src="docs/Demo Video for Voice to Text Feature.mp4" title="Demo Video for Voice to Text Feature"></video>](https://github.com/user-attachments/assets/219667c9-111a-4587-a21d-815bc2d1efdc)
+
 -----
 
 ## 🏗️ Architecture & Technology Stack
@@ -145,8 +149,8 @@ We utilize a robust **Multi-Model Fallback Strategy** via OpenRouter to ensure h
 
   * **Primary Model:** `glm-4.5` (General Language Model) for high-quality reasoning.
   * **Fallback Chain:** If the primary model hits a rate limit (HTTP 429) or fails, the backend automatically retries with the following sequence:
-    1.  `alibaba/tongyi-deepresearch-30b-a3b`
-    2.  `meituan/longcat-flash-chat`
+    1.  `qwen/qwen3-30b-a3b:free`
+    2.  `nvidia/nemotron-nano-9b-v2:free`
     3.  `mistralai/mistral-small-3.2-24b-instruct`
     4.  `microsoft/mai-ds-r1`
 
